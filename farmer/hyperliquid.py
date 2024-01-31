@@ -94,9 +94,25 @@ class HyperLiquid:
     def update_leverage(self, leverage: int, coin: str, is_cross_origin=True):
         self.exchange.update_leverage(leverage, coin, is_cross_origin)
         
+    def load_depth(self, coin: str):
+        res = self.info.l2_snapshot(coin=coin)
+        bids = res["levels"][0]
+        asks = res["levels"][1]
 
-    def cancel_order(self):
-        pass
+        return {
+            "bids": bids,
+            "asks": asks
+        }
+    
+    def cancel_order(self, coin: str, oid: int):
+        self.exchange.cancel(coin, oid)
+        logger.info(f"order #{oid} canceled")
+
+    def cancel_all_orders(self):
+        open_orders = self.info.open_orders(self.address)
+        for open_order in open_orders:
+            self.cancel_order(open_order["coin"], open_order["oid"])
+
 
     def withdraw(self):
         pass

@@ -13,8 +13,12 @@ def handle_order_execution_results_hl(order_result: dict, logger: Logger) -> dic
                 return {'filled': True, "status": 0}
                 
             except KeyError:
-                resting = status['resting']
-                logger.info(f"Order #{resting['oid']} is open")
-                return {"filled": False, "status": 0}
+                if "resting" in status:
+                    resting = status['resting']
+                    logger.info(f"Order #{resting['oid']} is open")
+                    return {"filled": False, "status": 0}
+                else:
+                    logger.error(status)
+                    return {"status": 1}
         else:
             return {"status": 1}
