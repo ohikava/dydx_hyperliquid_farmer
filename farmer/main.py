@@ -1,5 +1,5 @@
-from dydx_hyperliquid_farmer.dydx import DyDx
-from dydx_hyperliquid_farmer.hyperliquid import HyperLiquid
+from farmer.dydx import DyDx
+from farmer.hyperliquid import HyperLiquid
 
 class FarmingBot:
     def __init__(self) -> None:

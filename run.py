@@ -1,4 +1,4 @@
-from dydx_hyperliquid_farmer.main import FarmingBot
+from farmer.main import FarmingBot
 
 def run():
     bot = FarmingBot()
