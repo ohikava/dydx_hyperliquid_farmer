@@ -5,7 +5,7 @@ from farmer.utils import handle_order_execution_results_hl
 import eth_account
 import logging 
 from typing import Optional
-
+import time 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -14,14 +14,14 @@ class HyperLiquid:
     DEFAULT_SLIPPAGE = 0.05
 
     def __init__(self, mainnet=True, create_acc=False) -> None:
-        
+        self.TAKER_FEE = 0.025 / 100 # THIS IS IN PERCENTS e.g. 0.025% = 0.00025
+        self.MAKER_FEE = -0.002 / 100 # THIS IS IN PERCENTS e.g. -0.002% = -0.00002, IT IS NEGATIVE BECAUSE IT IS A REBATE
+
         if create_acc:
             self.generate_account()
         else:
             self.get_account()
         
-        print(self.address)
-
         if mainnet:
             self.info = Info(MAINNET_API_URL, skip_ws=True)
             self.exchange = Exchange(self.account, MAINNET_API_URL)
@@ -113,6 +113,19 @@ class HyperLiquid:
         for open_order in open_orders:
             self.cancel_order(open_order["coin"], open_order["oid"])
 
+    def get_funding_rate(self, coin: str):
+        current_time = int(time.time())
+        funding_rate = self.info.funding_history(coin, current_time)
+        return funding_rate[-1]
 
+    def compute_liq_price(self, price:float, side:int, account_value:float, position_size:float, maintance_margin_required:float, leverage:float) -> float:
+        """
+        computes liquidation price
+        :param side: order side(1 for long, -1 for short)
+        """
+        l = 1 / leverage
+        margin_available = account_value - maintance_margin_required
+
+        return price - side * margin_available / position_size / (1 - l * side)
     def withdraw(self):
         pass
