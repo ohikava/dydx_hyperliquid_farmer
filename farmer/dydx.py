@@ -1,22 +1,28 @@
-from dotenv import load_dotenv 
 import os 
 import logging
+from v4_client_py.clients import CompositeClient, IndexerClient
+from v4_client_py.clients.constants import Network
 
-load_dotenv()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 class DyDx:
-    def __init__(self) -> None:
-        # self.seed_phrase = os.getenv("DYDX_ACCOUNT_SEED")
-
-        # self.wallet = LocalWallet.from_mnemonic(self.seed_phrase)
-        # self.private_key = self.wallet.signer().private_key_hex 
+    def __init__(self, mainnet=False) -> None:
+        # if create_acc:
+        #     self.generate_account()
+        # else:
+        #     self.get_account()
         
-        # self.public_key = self.wallet.public_key().public_key_hex
-        # self.address = self.wallet.address()
+        if mainnet:
+            self.ix_client = IndexerClient(Network.mainnet())
+            self.comp_client = CompositeClient(Network.mainnet())
 
-        # logger.info(f"Current public key: {self.public_key}, Current address: {self.address}")
-        pass 
+        else:
+            # self.ix_client = IndexerClient(Network.testnet())
+            self.comp_client = CompositeClient(Network.testnet())
 
+    def get_depth(self, coin: str) -> dict:
+        symbol = f"{coin}-USD"
+        return self.comp_client.indexer_client.markets.get_perpetual_market_orderbook(symbol).data
+    
